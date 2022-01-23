@@ -6,6 +6,8 @@ import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import styled from 'styled-components';
+import Link from 'next/link';
+import { promises } from 'stream';
 
 const Index = () => {
   const [childrenBookData, setChildrenBookData] = useState([]);
@@ -23,21 +25,29 @@ const Index = () => {
     const CHILDREN_API_URL = 'https://dapi.kakao.com/v3/search/book?sort=accuracy&page=1&size=10&query=동화';
     const WEB_API_URL = 'https://dapi.kakao.com/v3/search/book?sort=accuracy&page=1&size=10&query=프로그래밍';
     const HUMAN_API_URL = 'https://dapi.kakao.com/v3/search/book?sort=accuracy&page=1&size=10&query=인문학';
-    Axios.get(CHILDREN_API_URL, {
-      headers: {
-        Authorization: `KakaoAK ${process.env.NEXT_PUBLIC_KAKAO_API_KEY}`,
-      },
-    }).then((res) => setChildrenBookData(res.data.documents));
-    Axios.get(WEB_API_URL, {
-      headers: {
-        Authorization: `KakaoAK ${process.env.NEXT_PUBLIC_KAKAO_API_KEY}`,
-      },
-    }).then((res) => setWebBookData(res.data.documents));
-    Axios.get(HUMAN_API_URL, {
-      headers: {
-        Authorization: `KakaoAK ${process.env.NEXT_PUBLIC_KAKAO_API_KEY}`,
-      },
-    }).then((res) => setHumanBookData(res.data.documents));
+
+    Promise.all([
+      Axios.get(CHILDREN_API_URL, {
+        headers: {
+          Authorization: `KakaoAK ${process.env.NEXT_PUBLIC_KAKAO_API_KEY}`,
+        },
+      }),
+      Axios.get(WEB_API_URL, {
+        headers: {
+          Authorization: `KakaoAK ${process.env.NEXT_PUBLIC_KAKAO_API_KEY}`,
+        },
+      }),
+      Axios.get(HUMAN_API_URL, {
+        headers: {
+          Authorization: `KakaoAK ${process.env.NEXT_PUBLIC_KAKAO_API_KEY}`,
+        },
+      }),
+    ]).then((res) => {
+      console.log(res, '[[[[');
+      setChildrenBookData(res[0].data.documents);
+      setWebBookData(res[1].data.documents);
+      setHumanBookData(res[2].data.documents);
+    });
   };
 
   useEffect(() => {
@@ -54,7 +64,13 @@ const Index = () => {
         <WrapperSlider style={{ width: '1050px' }}>
           <Slider {...settings}>
             {childrenBookData.map((book, idx) => {
-              return <ItemList key={idx} thumbnail={book.thumbnail} title={book.title} />;
+              return (
+                <Link href={`book/${book.isbn}`} key={idx}>
+                  <a>
+                    <ItemList thumbnail={book.thumbnail} title={book.title} />
+                  </a>
+                </Link>
+              );
             })}
           </Slider>
         </WrapperSlider>
@@ -62,7 +78,13 @@ const Index = () => {
         <WrapperSlider style={{ width: '1050px' }}>
           <Slider {...settings}>
             {webBookData.map((book, idx) => {
-              return <ItemList key={idx} thumbnail={book.thumbnail} title={book.title} />;
+              return (
+                <Link href={`book/${book.isbn}`} key={idx}>
+                  <a>
+                    <ItemList thumbnail={book.thumbnail} title={book.title} />;
+                  </a>
+                </Link>
+              );
             })}
           </Slider>
         </WrapperSlider>
@@ -70,7 +92,13 @@ const Index = () => {
         <WrapperSlider style={{ width: '1050px' }}>
           <Slider {...settings}>
             {humanBookData.map((book, idx) => {
-              return <ItemList key={idx} thumbnail={book.thumbnail} title={book.title} />;
+              return (
+                <Link href={`book/${book.isbn}`} key={idx}>
+                  <a>
+                    <ItemList thumbnail={book.thumbnail} title={book.title} />;
+                  </a>
+                </Link>
+              );
             })}
           </Slider>
         </WrapperSlider>
@@ -82,6 +110,7 @@ export default Index;
 
 const Wrapper = styled.div`
   position: relative;
+  height: 100%;
 `;
 const Section = styled.section`
   position: relative;

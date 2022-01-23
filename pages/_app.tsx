@@ -6,7 +6,7 @@ import 'semantic-ui-css/semantic.min.css';
 
 function MyApp({ Component, pageProps }) {
   return (
-    <div>
+    <div style={{ position: 'relative', height: '100%' }}>
       <Top />
       <Component {...pageProps} />
       <Footer />
